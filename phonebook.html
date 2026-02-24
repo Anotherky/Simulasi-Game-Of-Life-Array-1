@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📒 Buku Telepon</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1915;
+    --card: #211f1a;
+    --border: #3a3630;
+    --accent: #e8c87a;
+    --accent2: #c4703a;
+    --text: #f0ead8;
+    --text-muted: #8a8070;
+    --danger: #d45555;
+    --success: #5fa35f;
+    --input-bg: #171612;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, #2a2310 0%, transparent 50%),
+                      radial-gradient(ellipse at 80% 100%, #1a1208 0%, transparent 50%);
+  }
+
+  .app {
+    width: 100%;
+    max-width: 780px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 40px 0 30px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    margin: 20px auto 0;
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .header-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+    filter: drop-shadow(0 0 20px #e8c87a55);
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -1px;
+    text-shadow: 0 0 40px #e8c87a33;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 120px;
+    transition: border-color 0.2s;
+  }
+  .stat:hover { border-color: var(--accent); }
+  .stat span { color: var(--accent); font-size: 18px; font-weight: 700; font-family: 'Playfair Display', serif; }
+
+  /* MENU NAV */
+  nav {
+    display: flex;
+    gap: 6px;
+    margin: 20px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    flex: 1;
+    min-width: 100px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .nav-btn:hover { background: var(--card); color: var(--text); }
+  .nav-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 500;
+  }
+
+  /* PANELS */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SEARCH BAR */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  input[type=text], input[type=tel], input[type=email], select, textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type=text]:focus, input[type=tel]:focus, input[type=email]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px #e8c87a18;
+  }
+  .search-input { padding-left: 44px !important; }
+
+  /* ALPHABET FILTER */
+  .alpha-filter {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .alpha-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .alpha-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .alpha-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+
+  /* CONTACT LIST */
+  .contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .contact-list::-webkit-scrollbar { width: 4px; }
+  .contact-list::-webkit-scrollbar-track { background: transparent; }
+  .contact-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .contact-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.2s;
+    border-radius: 0 2px 2px 0;
+  }
+  .contact-card:hover { border-color: var(--accent); transform: translateX(4px); }
+  .contact-card:hover::before { transform: scaleY(1); }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--bg);
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .contact-phone { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .contact-group {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+  .group-keluarga { color: #7ec8a0; border-color: #7ec8a040; background: #7ec8a010; }
+  .group-teman   { color: #7ab3e0; border-color: #7ab3e040; background: #7ab3e010; }
+  .group-kerja   { color: #e8c87a; border-color: #e8c87a40; background: #e8c87a10; }
+  .group-lainnya { color: #a080c8; border-color: #a080c840; background: #a080c810; }
+
+  .btn-actions { display: flex; gap: 6px; }
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; letter-spacing: 1px; }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .required::after { content: ' *'; color: var(--accent2); }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 500;
+  }
+  .btn-primary:hover { background: #f0d890; transform: translateY(-1px); box-shadow: 0 4px 20px #e8c87a33; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+  .btn-danger:hover { background: var(--danger); color: white; }
+
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* DETAIL MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0f0e0ccc;
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 440px;
+    animation: modalIn 0.3s ease;
+    position: relative;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+  .modal-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 900;
+    color: var(--bg);
+    margin: 0 auto 16px;
+    text-transform: uppercase;
+  }
+  .modal-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .modal-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .modal-detail-row:last-of-type { border-bottom: none; }
+  .modal-detail-row .key { color: var(--text-muted); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .modal-detail-row .val { color: var(--text); text-align: right; }
+  .modal-detail-section { margin: 16px 0; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    box-shadow: 0 8px 30px #0008;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* SORT ROW */
+  .sort-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .sort-row label { color: var(--text-muted); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .sort-row select { max-width: 200px; padding: 8px 12px; font-size: 12px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* IMPORT/EXPORT */
+  .ie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .ie-grid { grid-template-columns: 1fr; } }
+  .ie-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .ie-card:hover { border-color: var(--accent); }
+  .ie-icon { font-size: 32px; margin-bottom: 10px; }
+  .ie-title { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--text); margin-bottom: 6px; }
+  .ie-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; }
+
+  /* NO RESULT */
+  .no-result {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <span class="header-icon">📒</span>
+    <h1>Buku Telepon</h1>
+    <p class="subtitle">Direktori Kontak Digital</p>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">📋 Total: <span id="stat-total">0</span></div>
+    <div class="stat">👨‍👩‍👧 Keluarga: <span id="stat-keluarga">0</span></div>
+    <div class="stat">👫 Teman: <span id="stat-teman">0</span></div>
+    <div class="stat">💼 Kerja: <span id="stat-kerja">0</span></div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <button class="nav-btn active" onclick="showPanel('daftar')" id="nav-daftar">📋 Daftar</button>
+    <button class="nav-btn" onclick="showPanel('tambah')" id="nav-tambah">➕ Tambah</button>
+    <button class="nav-btn" onclick="showPanel('cari')" id="nav-cari">🔍 Cari</button>
+    <button class="nav-btn" onclick="showPanel('ie')" id="nav-ie">📁 Ekspor</button>
+  </nav>
+
+  <!-- PANEL: DAFTAR -->
+  <div class="panel active" id="panel-daftar">
+    <div class="sort-row">
+      <label>Urutkan:</label>
+      <select id="sort-select" onchange="renderList()">
+        <option value="nama-az">Nama A–Z</option>
+        <option value="nama-za">Nama Z–A</option>
+        <option value="grup">Grup</option>
+        <option value="terbaru">Terbaru</option>
+      </select>
+    </div>
+
+    <div class="alpha-filter" id="alpha-filter">
+      <button class="alpha-btn active" onclick="setAlpha('semua')" data-alpha="semua">All</button>
+    </div>
+
+    <div class="contact-list" id="contact-list">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Belum ada kontak tersimpan</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: TAMBAH / EDIT -->
+  <div class="panel" id="panel-tambah">
+    <div class="section-title">
+      <span id="form-title-icon">➕</span>
+      <span id="form-title-text">Tambah Kontak Baru</span>
+    </div>
+    <form onsubmit="saveContact(event)">
+      <input type="hidden" id="edit-id" value="">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="required" for="f-nama">Nama Lengkap</label>
+          <input type="text" id="f-nama" placeholder="Budi Santoso" required>
+        </div>
+        <div class="form-group">
+          <label class="required" for="f-telepon">No. Telepon</label>
+          <input type="tel" id="f-telepon" placeholder="08xx-xxxx-xxxx" required>
+        </div>
+        <div class="form-group">
+          <label for="f-email">Email</label>
+          <input type="email" id="f-email" placeholder="email@contoh.com">
+        </div>
+        <div class="form-group">
+          <label for="f-grup">Grup</label>
+          <select id="f-grup">
+            <option value="lainnya">Lainnya</option>
+            <option value="keluarga">Keluarga</option>
+            <option value="teman">Teman</option>
+            <option value="kerja">Kerja</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label for="f-alamat">Alamat</label>
+          <input type="text" id="f-alamat" placeholder="Jl. Contoh No. 1, Kota">
+        </div>
+        <div class="form-group full">
+          <label for="f-catatan">Catatan</label>
+          <textarea id="f-catatan" rows="3" placeholder="Catatan tambahan..."></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">⟲ Reset</button>
+        <button type="submit" class="btn btn-primary" id="submit-btn">✓ Simpan Kontak</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- PANEL: CARI -->
+  <div class="panel" id="panel-cari">
+    <div class="section-title">🔍 Cari Kontak</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="search-input" placeholder="Cari nama, telepon, email..." oninput="doSearch()">
+    </div>
+    <div class="sort-row">
+      <label>Filter Grup:</label>
+      <select id="filter-grup" onchange="doSearch()">
+        <option value="">Semua Grup</option>
+        <option value="keluarga">Keluarga</option>
+        <option value="teman">Teman</option>
+        <option value="kerja">Kerja</option>
+        <option value="lainnya">Lainnya</option>
+      </select>
+    </div>
+    <div class="contact-list" id="search-list">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>Ketik untuk mulai mencari</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: IMPOR/EKSPOR -->
+  <div class="panel" id="panel-ie">
+    <div class="section-title">📁 Impor & Ekspor</div>
+    <div class="ie-grid">
+      <div class="ie-card">
+        <div class="ie-icon">📤</div>
+        <div class="ie-title">Ekspor ke JSON</div>
+        <div class="ie-desc">Simpan semua kontak dalam format file JSON untuk backup.</div>
+        <button class="btn btn-primary" onclick="exportJSON()">Ekspor JSON</button>
+      </div>
+      <div class="ie-card">
+        <div class="ie-icon">📊</div>
+        <div class="ie-title">Ekspor ke CSV</div>
+        <div class="ie-desc">Simpan semua kontak dalam format CSV untuk dibuka di Excel.</div>
+        <button class="btn btn-primary" onclick="exportCSV()">Ekspor CSV</button>
+      </div>
+      <div class="ie-card">
+        <div class="ie-icon">📥</div>
+        <div class="ie-title">Impor dari JSON</div>
+        <div class="ie-desc">Muat kontak dari file JSON yang telah diekspor sebelumnya.</div>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Pilih File</button>
+      </div>
+      <div class="ie-card">
+        <div class="ie-icon">🗑️</div>
+        <div class="ie-title">Hapus Semua</div>
+        <div class="ie-desc">Hapus seluruh data kontak dari buku telepon ini secara permanen.</div>
+        <button class="btn btn-danger" onclick="deleteAll()">Hapus Semua</button>
+      </div>
+    </div>
+    <br>
+    <div class="ie-card" style="text-align:left;padding:20px">
+      <div class="ie-title" style="font-size:14px;margin-bottom:10px">📝 Tambah Kontak Contoh</div>
+      <div class="ie-desc" style="margin-bottom:12px">Isi buku telepon dengan beberapa kontak contoh untuk demo.</div>
+      <button class="btn btn-secondary" onclick="addSample()">Muat Data Contoh</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-avatar" id="modal-avatar">?</div>
+    <div class="modal-name" id="modal-name"></div>
+    <div style="text-align:center;margin-bottom:16px" id="modal-group-badge"></div>
+    <div class="modal-detail-section" id="modal-details"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="editFromModal()">✏️ Edit</button>
+      <button class="btn btn-danger" onclick="deleteFromModal()">🗑️ Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let contacts = JSON.parse(localStorage.getItem('phonebook') || '[]');
+let currentAlpha = 'semua';
+let activeModalId = null;
+
+// ====== UTILS ======
+function save() {
+  localStorage.setItem('phonebook', JSON.stringify(contacts));
+}
+
+function toast(msg, color='var(--accent)') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function initials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+function avatarColor(name) {
+  const colors = [
+    ['#e8c87a','#c4703a'],['#7ab3e0','#3a70c4'],
+    ['#7ec8a0','#3aa870'],['#a080c8','#6040a8'],
+    ['#e07a7a','#c43a3a'],['#7ac8c8','#3aa8a8']
+  ];
+  const idx = name.charCodeAt(0) % colors.length;
+  return `linear-gradient(135deg, ${colors[idx][0]}, ${colors[idx][1]})`;
+}
+
+// ====== NAV ======
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  if (id === 'daftar') renderList();
+  if (id === 'cari') doSearch();
+}
+
+// ====== RENDER ======
+function buildAlpha() {
+  const letters = [...new Set(contacts.map(c => c.nama[0].toUpperCase()))].sort();
+  const wrap = document.getElementById('alpha-filter');
+  wrap.innerHTML = `<button class="alpha-btn ${currentAlpha==='semua'?'active':''}" onclick="setAlpha('semua')" data-alpha="semua">All</button>`;
+  letters.forEach(l => {
+    const b = document.createElement('button');
+    b.className = 'alpha-btn' + (currentAlpha===l?' active':'');
+    b.textContent = l;
+    b.setAttribute('data-alpha', l);
+    b.onclick = () => setAlpha(l);
+    wrap.appendChild(b);
+  });
+}
+
+function setAlpha(a) {
+  currentAlpha = a;
+  renderList();
+}
+
+function renderList() {
+  buildAlpha();
+  updateStats();
+  let list = [...contacts];
+  const sort = document.getElementById('sort-select').value;
+  if (sort === 'nama-az') list.sort((a,b)=>a.nama.localeCompare(b.nama));
+  else if (sort === 'nama-za') list.sort((a,b)=>b.nama.localeCompare(a.nama));
+  else if (sort === 'grup') list.sort((a,b)=>a.grup.localeCompare(b.grup));
+  else if (sort === 'terbaru') list.sort((a,b)=>b.id-a.id);
+
+  if (currentAlpha !== 'semua') {
+    list = list.filter(c => c.nama[0].toUpperCase() === currentAlpha);
+  }
+
+  const el = document.getElementById('contact-list');
+  if (list.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Belum ada kontak${currentAlpha!=='semua'?' dengan huruf '+currentAlpha:''}</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(c => contactCard(c)).join('');
+}
+
+function contactCard(c) {
+  return `
+  <div class="contact-card" onclick="openModal(${c.id})">
+    <div class="avatar" style="background:${avatarColor(c.nama)}">${initials(c.nama)}</div>
+    <div class="contact-info">
+      <div class="contact-name">${c.nama}</div>
+      <div class="contact-phone">${c.telepon}</div>
+    </div>
+    <span class="contact-group group-${c.grup}">${c.grup}</span>
+    <div class="btn-actions" onclick="event.stopPropagation()">
+      <button class="btn-icon" title="Edit" onclick="editContact(${c.id})">✏️</button>
+      <button class="btn-icon danger" title="Hapus" onclick="deleteContact(${c.id})">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = contacts.length;
+  ['keluarga','teman','kerja'].forEach(g => {
+    document.getElementById('stat-'+g).textContent = contacts.filter(c=>c.grup===g).length;
+  });
+}
+
+// ====== MODAL ======
+function openModal(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  activeModalId = id;
+  document.getElementById('modal-avatar').textContent = initials(c.nama);
+  document.getElementById('modal-avatar').style.background = avatarColor(c.nama);
+  document.getElementById('modal-name').textContent = c.nama;
+  document.getElementById('modal-group-badge').innerHTML = `<span class="contact-group group-${c.grup}">${c.grup}</span>`;
+  document.getElementById('modal-details').innerHTML = `
+    <div class="modal-detail-row"><span class="key">📞 Telepon</span><span class="val">${c.telepon}</span></div>
+    ${c.email ? `<div class="modal-detail-row"><span class="key">📧 Email</span><span class="val">${c.email}</span></div>` : ''}
+    ${c.alamat ? `<div class="modal-detail-row"><span class="key">📍 Alamat</span><span class="val">${c.alamat}</span></div>` : ''}
+    ${c.catatan ? `<div class="modal-detail-row"><span class="key">📝 Catatan</span><span class="val">${c.catatan}</span></div>` : ''}
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalBtn();
+}
+
+function closeModalBtn() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeModalId = null;
+}
+
+function editFromModal() {
+  closeModalBtn();
+  editContact(activeModalId);
+}
+
+function deleteFromModal() {
+  closeModalBtn();
+  deleteContact(activeModalId);
+}
+
+// ====== FORM ======
+function saveContact(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const contact = {
+    id: id ? parseInt(id) : Date.now(),
+    nama: document.getElementById('f-nama').value.trim(),
+    telepon: document.getElementById('f-telepon').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    grup: document.getElementById('f-grup').value,
+    alamat: document.getElementById('f-alamat').value.trim(),
+    catatan: document.getElementById('f-catatan').value.trim(),
+  };
+  if (id) {
+    const idx = contacts.findIndex(c=>c.id===parseInt(id));
+    contacts[idx] = contact;
+    toast('✅ Kontak berhasil diperbarui!');
+  } else {
+    contacts.push(contact);
+    toast('✅ Kontak berhasil ditambahkan!');
+  }
+  save();
+  resetForm();
+  showPanel('daftar');
+}
+
+function resetForm() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-nama').value = '';
+  document.getElementById('f-telepon').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-grup').value = 'lainnya';
+  document.getElementById('f-alamat').value = '';
+  document.getElementById('f-catatan').value = '';
+  document.getElementById('form-title-icon').textContent = '➕';
+  document.getElementById('form-title-text').textContent = 'Tambah Kontak Baru';
+  document.getElementById('submit-btn').textContent = '✓ Simpan Kontak';
+}
+
+function editContact(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('f-nama').value = c.nama;
+  document.getElementById('f-telepon').value = c.telepon;
+  document.getElementById('f-email').value = c.email;
+  document.getElementById('f-grup').value = c.grup;
+  document.getElementById('f-alamat').value = c.alamat;
+  document.getElementById('f-catatan').value = c.catatan;
+  document.getElementById('form-title-icon').textContent = '✏️';
+  document.getElementById('form-title-text').textContent = 'Edit Kontak';
+  document.getElementById('submit-btn').textContent = '✓ Perbarui Kontak';
+  showPanel('tambah');
+  window.scrollTo(0,0);
+}
+
+function deleteContact(id) {
+  if (!confirm('Yakin ingin menghapus kontak ini?')) return;
+  contacts = contacts.filter(c=>c.id!==id);
+  save();
+  renderList();
+  doSearch();
+  toast('🗑️ Kontak dihapus', 'var(--danger)');
+}
+
+// ====== SEARCH ======
+function doSearch() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const grp = document.getElementById('filter-grup').value;
+  const el = document.getElementById('search-list');
+  if (!q && !grp) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Ketik untuk mulai mencari</p></div>`;
+    return;
+  }
+  let res = contacts.filter(c => {
+    const match = !q || c.nama.toLowerCase().includes(q) || c.telepon.includes(q) || (c.email||'').toLowerCase().includes(q);
+    const grupMatch = !grp || c.grup === grp;
+    return match && grupMatch;
+  });
+  if (res.length === 0) {
+    el.innerHTML = `<div class="no-result">😶 Tidak ditemukan kontak yang cocok</div>`;
+    return;
+  }
+  el.innerHTML = res.map(c => contactCard(c)).join('');
+}
+
+// ====== EXPORT/IMPORT ======
+function exportJSON() {
+  if (contacts.length === 0) { toast('⚠️ Tidak ada kontak untuk diekspor', 'var(--danger)'); return; }
+  const blob = new Blob([JSON.stringify(contacts, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'buku-telepon.json';
+  a.click();
+  toast('📤 Ekspor JSON berhasil!');
+}
+
+function exportCSV() {
+  if (contacts.length === 0) { toast('⚠️ Tidak ada kontak untuk diekspor', 'var(--danger)'); return; }
+  const header = 'Nama,Telepon,Email,Grup,Alamat,Catatan';
+  const rows = contacts.map(c => `"${c.nama}","${c.telepon}","${c.email}","${c.grup}","${c.alamat}","${c.catatan}"`);
+  const blob = new Blob([header+'\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'buku-telepon.csv';
+  a.click();
+  toast('📊 Ekspor CSV berhasil!');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      contacts.push(...data.map(c => ({...c, id: Date.now()+Math.random()})));
+      save();
+      renderList();
+      toast(`✅ ${data.length} kontak berhasil diimpor!`);
+    } catch { toast('❌ File tidak valid', 'var(--danger)'); }
+  };
+  r.readAsText(file);
+  e.target.value = '';
+}
+
+function deleteAll() {
+  if (!confirm('PERHATIAN: Semua kontak akan dihapus permanen. Lanjutkan?')) return;
+  contacts = [];
+  save();
+  renderList();
+  toast('🗑️ Semua kontak dihapus', 'var(--danger)');
+}
+
+function addSample() {
+  const samples = [
+    {nama:'Budi Santoso',telepon:'08123456789',email:'budi@gmail.com',grup:'kerja',alamat:'Jl. Sudirman No. 10, Jakarta',catatan:'Kolega di divisi IT'},
+    {nama:'Dewi Rahayu',telepon:'08234567890',email:'dewi@yahoo.com',grup:'keluarga',alamat:'Jl. Mawar No. 5, Bandung',catatan:'Kakak kandung'},
+    {nama:'Andi Wijaya',telepon:'08345678901',email:'andi@hotmail.com',grup:'teman',alamat:'Jl. Melati No. 3, Surabaya',catatan:'Teman SMA'},
+    {nama:'Siti Nurhaliza',telepon:'08456789012',email:'siti@gmail.com',grup:'keluarga',alamat:'Jl. Kenanga No. 7, Yogyakarta',catatan:'Ibu'},
+    {nama:'Rudi Hermawan',telepon:'08567890123',email:'rudi@work.id',grup:'kerja',alamat:'Gedung BRI, Lantai 5, Jakarta',catatan:'Manager proyek'},
+    {nama:'Maya Puspita',telepon:'08678901234',email:'maya@email.com',grup:'teman',alamat:'Jl. Anggrek No. 12, Semarang',catatan:'Teman kuliah'},
+  ];
+  samples.forEach(s => contacts.push({...s, id: Date.now()+Math.random()}));
+  save();
+  renderList();
+  toast(`✅ ${samples.length} kontak contoh ditambahkan!`);
+}
+
+// ====== INIT ======
+renderList();
+</script>
+</body>
+</html>
